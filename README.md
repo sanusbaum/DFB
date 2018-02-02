@@ -4,7 +4,7 @@ Digital File Binder
 Usage: DFB.exe
 
 
-a [<filename>] [<export_path>][<execute_string>] add a file
+a [&lt;filename>] [<export_path>][<execute_string>] add a file
   
 e [<file_id>[<export_path>]] export files
 
