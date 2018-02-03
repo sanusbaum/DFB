@@ -177,10 +177,12 @@ void Binder::save()
 
 bool Binder::remove_file(unsigned int index_)
 {
-	if (index_ < _files.size())
+	if (index_ >= _files.size())
 	{
-		_files.erase(_files.begin() + index_);
-		return true;
+		return false;
 	}
-	return false;
+
+	_files.erase(_files.begin() + index_);
+
+	return true;
 }

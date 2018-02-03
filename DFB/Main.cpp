@@ -158,9 +158,9 @@ int main(int argc_, char** argv_)
 				}
 				else
 				{
-					for (unsigned int i = 0; i < binder.get_number_of_files(); i++)
+					for (unsigned int i = binder.get_number_of_files(); i > 0; i--)
 					{
-						binder.remove_file(i);
+						binder.remove_file(i - 1);
 					}
 				}
 
