@@ -11,6 +11,7 @@ CharArray BinderFile::length(CharArray data_)
 		result.prepend(&data_number, 1);
 		data_size /= 10;
 	}
+	// Makes sure that the result is 10 characters
 	for (int i = result.size(); i < 10; i++)
 	{
 		result.prepend("0", 1);
@@ -39,7 +40,7 @@ BinderFile::BinderFile(CharArray import_string_)
 	unsigned int position = 0;
 	char number[11];
 
-	// _import_path
+	// getting _import_path
 	for (int i = 0; i < 11; i++)
 	{
 		number[i] = import_string_.get()[position + i];
@@ -48,12 +49,12 @@ BinderFile::BinderFile(CharArray import_string_)
 	{
 		number[10] = '\0';
 		unsigned int import_path_size = atoi(number);
-		
+
 		_import_path.CharArray::set(import_string_.get() + 11, import_path_size);
 		position += 11 + import_path_size;
 	}
 
-	// _export_path
+	// getting _export_path
 	for (int i = 0; i < 11; i++)
 	{
 		number[i] = import_string_.get()[position + i];
@@ -61,13 +62,13 @@ BinderFile::BinderFile(CharArray import_string_)
 	if (number[10] == ':')
 	{
 		number[10] = '\0';
-		unsigned int import_path_size = atoi(number);
-		
-		_export_path.CharArray::set(import_string_.get() + 11 + position, import_path_size);
-		position += 11 + import_path_size;
+		unsigned int export_path_size = atoi(number);
+
+		_export_path.CharArray::set(import_string_.get() + 11 + position, export_path_size);
+		position += 11 + export_path_size;
 	}
 
-	// _file_data
+	// getting _file_data
 	for (int i = 0; i < 11; i++)
 	{
 		number[i] = import_string_.get()[position + i];
@@ -75,13 +76,13 @@ BinderFile::BinderFile(CharArray import_string_)
 	if (number[10] == ':')
 	{
 		number[10] = '\0';
-		unsigned int import_path_size = atoi(number);
-		
-		_file_data.set(import_string_.get() + 11 + position, import_path_size);
-		position += 11 + import_path_size;
+		unsigned int file_data_size = atoi(number);
+
+		_file_data.set(import_string_.get() + 11 + position, file_data_size);
+		position += 11 + file_data_size;
 	}
 
-	// _file_extras
+	// getting _file_extras
 	for (int i = 0; i < 11; i++)
 	{
 		number[i] = import_string_.get()[position + i];
@@ -89,13 +90,13 @@ BinderFile::BinderFile(CharArray import_string_)
 	if (number[10] == ':')
 	{
 		number[10] = '\0';
-		unsigned int import_path_size = atoi(number);
-		
-		_file_extras.CharArray::set(import_string_.get() + 11 + position, import_path_size);
-		position += 11 + import_path_size;
+		unsigned int file_extras_size = atoi(number);
+
+		_file_extras.CharArray::set(import_string_.get() + 11 + position, file_extras_size);
+		position += 11 + file_extras_size;
 	}
 
-	// _execute_string
+	// getting _execute_string
 	for (int i = 0; i < 11; i++)
 	{
 		number[i] = import_string_.get()[position + i];
@@ -103,10 +104,10 @@ BinderFile::BinderFile(CharArray import_string_)
 	if (number[10] == ':')
 	{
 		number[10] = '\0';
-		unsigned int import_path_size = atoi(number);
-		
-		_execute_string.CharArray::set(import_string_.get() + 11 + position, import_path_size);
-		position += 11 + import_path_size;
+		unsigned int execute_string_size = atoi(number);
+
+		_execute_string.CharArray::set(import_string_.get() + 11 + position, execute_string_size);
+		position += 11 + execute_string_size;
 	}
 }
 
@@ -124,13 +125,17 @@ BinderFile::BinderFile(
 	_execute_string = execute_string_;
 }
 
-BinderFile::BinderFile(CAString import_path_) // only sets _import_path and _file_data
+BinderFile::BinderFile(CAString import_path_)
 {
 	_import_path = import_path_;
-	
-	// ex: C:\path\to\file.exe
-	// ex: C:/path/to/file.exe
-	// ex: path_to_file.exe
+
+	// Because paths can be written in a variety of ways, and we want just the
+	// file name, we have to check for the positions of '/' and '\\'. For
+	// instance, the paths could be written as follows:
+	//     C:\path\to\file.exe
+	//     C:/path/to/file.exe
+	//     path_to_file.exe
+	// all different but valid ways to write paths. We have to handle for this.
 	unsigned int start_position = import_path_.lastIndexOf('/');
 	if (start_position == -1)
 	{
@@ -280,16 +285,16 @@ void BinderFile::export_file(CAString temporary_export_path_)
 
 void BinderFile::execute()
 {
-	STARTUPINFO si;
-    PROCESS_INFORMATION pi;
+	STARTUPINFO startup_info;
+	PROCESS_INFORMATION process_info;
 
-    ZeroMemory( &si, sizeof(si) );
-    si.cb = sizeof(si);
-    ZeroMemory( &pi, sizeof(pi) );
+	ZeroMemory(&startup_info, sizeof(startup_info));
+	startup_info.cb = sizeof(startup_info);
+	ZeroMemory(&process_info, sizeof(process_info));
 
 	size_t length = strlen(_execute_string.get());
 	std::wstring text_wchar(length, L'#');
 	mbstowcs(&text_wchar[0], _execute_string.get(), length);
 
-	CreateProcess(NULL, &text_wchar[0], NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);
+	CreateProcess(NULL, &text_wchar[0], NULL, NULL, FALSE, 0, NULL, NULL, &startup_info, &process_info);
 }

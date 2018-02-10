@@ -3,22 +3,25 @@
 CAString::CAString()
 {
 	_data = 0;
-	_data_length = 0;
-	CharArray::set("", 1);
+	_data_size = 0;
+	CharArray::set("", 1); // '\0'
+	_data_length = 1;
 }
 
 CAString::CAString(const char* data_)
 {
 	_data = 0;
-	_data_length = 0;
+	_data_size = 0;
 	CharArray::set(data_, CharArray::length(data_) + 1);
+	_data_length = CharArray::length(data_);
 }
 
 CAString::CAString(const CAString& to_copy_)
 {
 	_data = 0;
-	_data_length = 0;
+	_data_size = 0;
 	CharArray::set(to_copy_._data, to_copy_._data_size);
+	_data_length = to_copy_._data_length;
 }
 
 CAString& CAString::operator=(const CAString& right_hand_side_)
@@ -78,7 +81,7 @@ bool CAString::operator!=(const char* right_hand_side_)
 
 void CAString::append(const CAString& data_)
 {
-	size_t new_length = _data_size + data_._data_size - 1;
+	size_t new_length = _data_size + data_._data_size - 1; // -1 because of hte extra '\0' char
 	char* new_data = new char[new_length];
 	for (size_t index = 0; index < _data_size - 1; index++)
 	{
@@ -160,14 +163,14 @@ void CAString::prepend(const char* data_)
 	_data_length = new_size - 1;
 }
 
-void CAString::set(const char* data_)
-{
-	CharArray::set(data_, CharArray::length(data_) + 1);
-}
-
 void CAString::set(const CAString& data_)
 {
 	CharArray::set(data_._data, data_._data_size);
+}
+
+void CAString::set(const char* data_)
+{
+	CharArray::set(data_, CharArray::length(data_) + 1);
 }
 
 unsigned int CAString::length()
